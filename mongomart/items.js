@@ -52,21 +52,99 @@ function ItemDAO(database) {
         *
         */
 
+        //********************
+        //Juan Miguel, codigo original
         var categories = [];
         var category = {
             _id: "All",
             num: 9999
         };
 
-        categories.push(category)
+        //categories.push(category)
+        //juan miguel, fin codigo original
+        //*********************
+
+        //**********************************************
+        //Juan miguel, codigo de prueba shell
+            //db.item.find().limit(10).pretty()
+            //db.item.find({"category":"Apparel"}).count()//Igual a 6
+            //Agrupar por categoria y contar los items
+            /*db.item.aggregate([
+                { $group: {
+                    _id: "$category",
+                num: { $sum: 1 }
+            } }
+            ])*/
+
+
+        //juan miguel, fin de codigo de prueba shell
+        //**********************************************
 
         // TODO-lab1A Replace all code above (in this method).
+            //Juan Miguel metodo
+                var collectionItem = this.db.collection('item');
+                // Insert the docs
+                    // Execute aggregate, notice the pipeline is expressed as an Array
+                    collectionItem.aggregate([
+                        { $group: {
+                                _id: "$category",
+                            num: { $sum: 1 }
+                        } },
+                        { $sort: { _id: 1 } }
+                    ],
+                    function(err, arrayDeCategorias) {
+                        assert.equal(null, err);
+                        let num_total_de_items = 0;
+                        arrayDeCategorias.forEach(function(current_value) {
+                            //Calcular el numero total de items
+                            num_total_de_items += current_value.num;
+                            //guardar categoria en array
+                            categories.push(current_value)
+                         });
+                         console.log('numero total de items: ', num_total_de_items);
+                         //Crear categoria all
+                         category = {
+                            _id: "All",
+                            num: num_total_de_items
+                         };
+                         categories.push(category)
+                         callback(categories);
+
+                        //Aqui no tengo que cerrar la db
+                        //db.close();
+                    });
+
+                    /* ejemplo                    
+                    collection.aggregate([
+                        { $project : {
+                        author : 1,
+                        tags : 1
+                        }},
+                        { $unwind : "$tags" },
+                        { $group : {
+                        _id : {tags : "$tags"},
+                        authors : { $addToSet : "$author" }
+                        }}
+                    ], function(err, result) {
+                        test.equal(null, err);
+                        test.equal('good', result[0]._id.tags);
+                        test.deepEqual(['bob'], result[0].authors);
+                        test.equal('fun', result[1]._id.tags);
+                        test.deepEqual(['bob'], result[1].authors);
+
+                        db.close();
+                    });
+                    */
+                
+            //FIN Juan Miguel metodo
+
+
 
         // TODO Include the following line in the appropriate
         // place within your code to pass the categories array to the
         // callback.
-        callback(categories);
-    }
+        //callback(categories);
+    }//Fin de this.getCategories
 
 
     this.getItems = function(category, page, itemsPerPage, callback) {
