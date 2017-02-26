@@ -54,11 +54,15 @@ function ItemDAO(database) {
 
         //********************
         //Juan Miguel, codigo original
+        
         var categories = [];
+        let categoriesNotALL = [];
+        
         var category = {
             _id: "All",
             num: 9999
         };
+        
 
         //categories.push(category)
         //juan miguel, fin codigo original
@@ -95,19 +99,28 @@ function ItemDAO(database) {
                     function(err, arrayDeCategorias) {
                         assert.equal(null, err);
                         let num_total_de_items = 0;
+                        //console.log('array de categorias: ', arrayDeCategorias)
                         arrayDeCategorias.forEach(function(current_value) {
                             //Calcular el numero total de items
                             num_total_de_items += current_value.num;
                             //guardar categoria en array
-                            categories.push(current_value)
-                         });
-                         console.log('numero total de items: ', num_total_de_items);
+                            //categories.push(current_value)
+                            categoriesNotALL = arrayDeCategorias;
+                    });
+                         console.log('array de categoriesNotALL: ', categoriesNotALL)
+                         //console.log('numero total de items: ', num_total_de_items);
                          //Crear categoria all
                          category = {
                             _id: "All",
                             num: num_total_de_items
                          };
                          categories.push(category)
+                         //Guardo el resto de categorias
+                         categoriesNotALL.forEach(function(current_value) {
+                            //guardar categoria en array
+                            categories.push(current_value)
+                         });
+                         console.log('array de categories final: ', categories)
                          callback(categories);
 
                         //Aqui no tengo que cerrar la db
@@ -172,25 +185,54 @@ function ItemDAO(database) {
          *
          */
 
+        //codigo original
+        /*
         var pageItem = this.createDummyItem();
         var pageItems = [];
         for (var i=0; i<5; i++) {
             pageItems.push(pageItem);
         }
+        */
+        //Fin de codigo original
 
         // TODO-lab1B Replace all code above (in this method).
+            //Juan miguel metodo
+                console.log('categoria por la que buscar: ', category);
+                //Uso el metodo includes de string para comparar.
+                if(category.localeCompare ('All') != 0){
+                //if(category != 'ALL'){
+                    console.log('buscando por: ', category);
+                    console.log('skip: ',page);
+                    console.log('limit: ',itemsPerPage);
+                    var collectionItem = this.db.collection('item');
+                    collectionItem.find({"category":category})
+                    .skip(page*5).limit(itemsPerPage).sort({_id:1}).toArray(function(err, pageItems) {
+                        assert.equal(null, err);
+                        callback(pageItems);
+                    });
+                }else{
+                    //La categoria es all, devuelvo todos los items
+                    console.log('buscando por All: ', category);
+                    var collectionItem = this.db.collection('item');
+                    collectionItem.find({})
+                    .skip(page*5).limit(itemsPerPage).sort({_id:1}).toArray(function(err, pageItems) {
+                        assert.equal(null, err);
+                        callback(pageItems);
+                    });
+                }
+            //juan miguel metodo
 
         // TODO Include the following line in the appropriate
         // place within your code to pass the items for the selected page
         // to the callback.
-        callback(pageItems);
-    }
+        //callback(pageItems);
+    }//Fin de getCategories
 
 
     this.getNumItems = function(category, callback) {
         "use strict";
-
-        var numItems = 0;
+        //Original
+        //var numItems = 0;
 
         /*
          * TODO-lab1C:
@@ -207,9 +249,31 @@ function ItemDAO(database) {
          *
          */
 
+            //Juan miguel metodo
+            //ejemplo de la shell:
+            //db.item.find({"category":"Apparel"}).count()//Igual a 6
+            if(category.localeCompare ('All') != 0){
+                    var collectionItem = this.db.collection('item');
+                    collectionItem.find({"category":category})
+                        .count(function(err, numItems) {
+                        assert.equal(null, err);
+                        callback(numItems);
+                    });
+            }else{//Devuelve el numero total de items
+                    var collectionItem = this.db.collection('item');
+                    collectionItem.find({})
+                        .count(function(err, numItems) {
+                        assert.equal(null, err);
+                        callback(numItems);
+                    });
+            }    
+
+                    
+            //juan miguel metodo
+
          // TODO Include the following line in the appropriate
          // place within your code to pass the count to the callback.
-        callback(numItems);
+        //callback(numItems);
     }
 
 
