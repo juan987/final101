@@ -303,19 +303,36 @@ function ItemDAO(database) {
          * description. You should simply do this in the mongo shell.
          *
          */
-
+        //Original code
+        /*
         var item = this.createDummyItem();
         var items = [];
         for (var i=0; i<5; i++) {
             items.push(item);
         }
+        */
+
+        
 
         // TODO-lab2A Replace all code above (in this method).
+            //juan miguel metodo
+                console.log('en metodo searchItems, la query es: ', query);
+                //definir los text indexes en la shell
+                //db.item.createIndex( { title: "text", slogan: "text", description: "text" } )
+                console.log('skip: ',page);
+                    console.log('limit: ',itemsPerPage);
+                    var collectionItem = this.db.collection('item');
+                    collectionItem.find({ $text: { $search: query } })
+                    .skip(page*5).limit(itemsPerPage).sort({_id:1}).toArray(function(err, items) {
+                        assert.equal(null, err);
+                        callback(items)
+                    });
+            //fin juan miguel metodo
 
         // TODO Include the following line in the appropriate
         // place within your code to pass the items for the selected page
         // of search results to the callback.
-        callback(items);
+        //callback(items);
     }
 
 
@@ -337,7 +354,16 @@ function ItemDAO(database) {
         * simply do this in the mongo shell.
         */
 
-        callback(numItems);
+            //juan miguel metodo
+                var collectionItem = this.db.collection('item');
+                collectionItem.find({$text: { $search: query }})
+                        .count(function(err, numItems) {
+                        assert.equal(null, err);
+                        callback(numItems);
+                });
+            //fin juan miguel metodo
+
+        //callback(numItems);
     }
 
 
@@ -354,14 +380,21 @@ function ItemDAO(database) {
          *
          */
 
-        var item = this.createDummyItem();
+        //var item = this.createDummyItem();
 
         // TODO-lab3 Replace all code above (in this method).
-
+            //juan miguel metodo
+                var collectionItem = this.db.collection('item');
+                    collectionItem.find({"_id":itemId})
+                    .toArray(function(err, pageItems) {
+                        assert.equal(null, err);
+                        callback(pageItems[0]);
+                    });
+            //fin juan miguel metodo
         // TODO Include the following line in the appropriate
         // place within your code to pass the matching item
         // to the callback.
-        callback(item);
+        //callback(item);
     }
 
 
