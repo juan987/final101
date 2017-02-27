@@ -452,7 +452,7 @@ function ItemDAO(database) {
                     //esperamos un segundo y recuperamos el doc modificado
                         setTimeout(function() {
                             collectionItem.findOne({"_id":itemId}).then(function(item) {
-                            callback(doc);
+                            callback(item);
                         });
                         }, 1000);
                 });
